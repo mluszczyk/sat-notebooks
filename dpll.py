@@ -1,4 +1,19 @@
 from typing import List, Tuple, Set
+from random import randint, choice
+
+
+def get_random_ksat(k, n, m):
+    """returns k-SAT with max n variables and m clauses"""
+    clauses = []
+    for i in range(m):
+        clause = []
+        for j in range(k):
+            var = randint(1, n)
+            sign = choice([1, -1])
+            svar = sign * var
+            clause.append(svar)
+        clauses.append(clause)
+    return SAT(clauses)
 
 
 class SAT(object):
@@ -81,6 +96,10 @@ def main():
     ])
     print(s)
     print(DPLL().run(s))
+
+    rsat = get_random_ksat(3, 4, 20)
+    print(rsat)
+    print(DPLL().run(rsat))
 
 
 if __name__ == "__main__":
