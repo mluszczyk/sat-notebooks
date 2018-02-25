@@ -2,7 +2,7 @@ from typing import List, Tuple, Set
 
 
 class SAT(object):
-    def __init__(self, clauses: List[Set[int]]):
+    def __init__(self, clauses: List[List[int]]):
         clauses = [set(c) for c in clauses]
         if clauses:
             svars = [abs(x) for x in set.union(*clauses)]
