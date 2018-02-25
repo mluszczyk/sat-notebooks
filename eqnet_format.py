@@ -1,5 +1,6 @@
 from typing import List
 
+import numpy
 import theano
 from data.tree import Node
 from encoders.baseencoder import AbstractEncoder
@@ -7,6 +8,9 @@ from encoders.baseencoder import AbstractEncoder
 from dpll import get_random_ksat, DPLL
 
 ENCODER_PKL = "models/rnnsupervisedencoder-largeSimpleBoolean5.pkl"
+
+ENCODER = AbstractEncoder.load(ENCODER_PKL)
+
 
 
 def variable_to_tree(num: int, parent):
@@ -56,18 +60,41 @@ def cnf_to_eqnet(clauses, parent=None):
         return and_node
 
 
+def dist_to_false(x):
+    return numpy.sqrt(numpy.sum((x - FALSE_ENCODING) ** 2))
+
+
+def mean(x):
+    return sum(x)/len(x)
+
+
+def stdev(x):
+    return (sum(y**2 for y in x) - mean(x)**2)**0.5
+
+
+FALSE_EQNET_FORM = cnf_to_eqnet([[1], [-1]])
+FALSE_ENCODING = ENCODER.get_encoding(FALSE_EQNET_FORM)
+
+
 def main():
     print(theano.__version__)
-    rsat = get_random_ksat(2, 4, 2)
-    print(rsat)
-    print(DPLL().run(rsat))
-    clauses = [list(clause) for clause in rsat.clauses]
-    eqnet_form = cnf_to_eqnet(clauses)
-    print(eqnet_form)
 
-    encoder = AbstractEncoder.load(ENCODER_PKL)
-    encoding = encoder.get_encoding(eqnet_form)
-    print(encoding)
+    trues = []
+    falses = []
+    for i in range(1000):
+        rsat = get_random_ksat(3, 3, 20)
+        clauses = [list(clause) for clause in rsat.clauses]
+        eqnet_form = cnf_to_eqnet(clauses)
+        encoding = ENCODER.get_encoding(eqnet_form)
+        dist = dist_to_false(encoding)
+        if DPLL().run(rsat):
+            trues.append(dist)
+        else:
+            falses.append(dist)
+    print("#Trues: {}; avg dist: {}; stdev dist: {}".format(
+        len(trues), mean(trues), stdev(trues)))
+    print("#Falses: {}; avg dist: {}; stdev dist: {}".format(
+        len(falses), mean(falses), stdev(falses)))
 
 
 if __name__ == "__main__":
