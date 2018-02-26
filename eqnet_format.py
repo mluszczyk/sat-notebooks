@@ -69,7 +69,7 @@ def mean(x):
 
 
 def stdev(x):
-    return (sum(y**2 for y in x) - mean(x)**2)**0.5
+    return (sum(y**2 for y in x)/len(x) - mean(x)**2)**0.5
 
 
 FALSE_EQNET_FORM = cnf_to_eqnet([[1], [-1]])
