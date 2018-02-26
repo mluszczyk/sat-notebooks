@@ -12,7 +12,6 @@ ENCODER_PKL = "models/rnnsupervisedencoder-largeSimpleBoolean5.pkl"
 ENCODER = AbstractEncoder.load(ENCODER_PKL)
 
 
-
 def variable_to_tree(num: int, parent):
     letter = chr(ord('a') + abs(num) - 1)
     assert 'a' <= letter <= 'z'

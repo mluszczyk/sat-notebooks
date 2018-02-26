@@ -62,8 +62,12 @@ class SAT(object):
 
 
 class DPLL(object):
+    def __init__(self):
+        self.number_of_runs = 0
+
     def run(self, sat: SAT):
         assert isinstance(sat, SAT)
+        self.number_of_runs += 1
 
         if sat.is_true():
             return []
