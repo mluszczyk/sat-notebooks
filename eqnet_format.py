@@ -27,6 +27,7 @@ def variable_to_tree(num: int, parent):
 
 def clause_to_tree(clause: List[int], parent):
     assert clause
+    clause = list(clause)
 
     if len(clause) == 1:
         return variable_to_tree(clause[0], parent)
