@@ -8,6 +8,7 @@ from tqdm import tqdm
 
 from data.datasetgenerator import save_result_as_gzipped_json
 from data.tree import Node
+from data.synthetic.boolexpressions import convert_to_dict
 
 from dpll import get_random_ksats
 from eqnet_format import cnf_to_eqnet
