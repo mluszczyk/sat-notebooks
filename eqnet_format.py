@@ -7,10 +7,6 @@ from encoders.baseencoder import AbstractEncoder
 
 from dpll import get_random_ksat, DPLL
 
-ENCODER_PKL = "models/rnnsupervisedencoder-largeSimpleBoolean5.pkl"
-
-ENCODER = AbstractEncoder.load(ENCODER_PKL)
-
 
 def variable_to_tree(num: int, parent):
     letter = chr(ord('a') + abs(num) - 1)
@@ -60,8 +56,8 @@ def cnf_to_eqnet(clauses, parent=None):
         return and_node
 
 
-def dist_to_false(x):
-    return numpy.sqrt(numpy.sum((x - FALSE_ENCODING) ** 2))
+def l2(x, y):
+    return numpy.sqrt(numpy.sum((x - y) ** 2))
 
 
 def mean(x):
@@ -72,12 +68,23 @@ def stdev(x):
     return (sum(y**2 for y in x)/len(x) - mean(x)**2)**0.5
 
 
-FALSE_EQNET_FORM = cnf_to_eqnet([[1], [-1]])
-FALSE_ENCODING = ENCODER.get_encoding(FALSE_EQNET_FORM)
+ENCODER_PKL = "models/rnnsupervisedencoder-largeSimpleBoolean5.pkl"
+
+
+def get_encoder():
+    return AbstractEncoder.load(ENCODER_PKL)
+
+
+def get_false_encoding(encoder):
+    false_eqnet_form = cnf_to_eqnet([[1], [-1]])
+    return encoder.get_encoding(false_eqnet_form)
 
 
 def main():
     print(theano.__version__)
+    encoder = get_encoder()
+
+    false_encoding = get_false_encoding(encoder)
 
     trues = []
     falses = []
@@ -85,8 +92,8 @@ def main():
         rsat = get_random_ksat(3, 3, 20)
         clauses = [list(clause) for clause in rsat.clauses]
         eqnet_form = cnf_to_eqnet(clauses)
-        encoding = ENCODER.get_encoding(eqnet_form)
-        dist = dist_to_false(encoding)
+        encoding = encoder.get_encoding(eqnet_form)
+        dist = l2(encoding, false_encoding)
         if DPLL().run(rsat):
             trues.append(dist)
         else:
