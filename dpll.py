@@ -1,3 +1,4 @@
+import random
 from typing import List, Tuple, Set
 from random import randint, choice
 
@@ -17,6 +18,14 @@ def get_random_ksat(k, n, m):
             clause.append(svar)
         clauses.append(clause)
     return SAT(clauses)
+
+
+def get_random_ksats(sample_number, clause_size, variable_number,
+                     clause_number):
+    rsats = [get_random_ksat(clause_size, variable_number,
+                             random.randint(1, clause_number))
+             for _ in range(sample_number)]
+    return rsats
 
 
 class SAT(object):
