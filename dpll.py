@@ -1,6 +1,9 @@
 from typing import List, Tuple, Set
 from random import randint, choice
 
+from sympy.logic import simplify_logic
+from sympy.parsing.sympy_parser import parse_expr
+
 
 def get_random_ksat(k, n, m):
     """returns k-SAT with max n variables and m clauses"""
@@ -30,6 +33,27 @@ class SAT(object):
 
         self.vars = svars
         self.clauses = clauses
+
+    def get_token_string(self):
+        def num_to_letter(num):
+            assert num <= 25
+            return chr(num-1+ord('a'))
+        tokens = []
+        for clause in self.clauses:
+            tokens.append('(')
+            for var in clause:
+                if var < 0:
+                    tokens.append('~')
+                tokens.append(num_to_letter(abs(var)))
+                tokens.append('|')
+            tokens.pop()
+            tokens.append(')')
+            tokens.append('&')
+        tokens.pop()
+        return ''.join(tokens)
+
+    def simplified(self):
+        return simplify_logic(parse_expr(self.get_token_string()))
 
     def set_var(self, v):
         av = abs(v)
@@ -104,6 +128,7 @@ def main():
     rsat = get_random_ksat(3, 4, 20)
     print(rsat)
     print(DPLL().run(rsat))
+    print(rsat.simplified())
 
 
 if __name__ == "__main__":
