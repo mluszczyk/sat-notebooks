@@ -1,4 +1,4 @@
 /.ipynb_checkpoints/
-models/
 venv/
 .idea/
+__pycache__
