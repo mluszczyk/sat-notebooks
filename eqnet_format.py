@@ -21,37 +21,39 @@ def variable_to_tree(num: int, parent):
         return not_node
 
 
-def clause_to_tree(clause: List[int], parent):
+def clause_to_tree(clause: List[int], parent, log_depth=False):
     assert clause
     clause = list(clause)
 
     if len(clause) == 1:
         return variable_to_tree(clause[0], parent)
     else:
+        border = int(len(clause) / 2)
         or_node = Node('Or', ('left', 'right'), parent=parent)
-        left = variable_to_tree(clause[0], or_node)
+        left = clause_to_tree(clause[:border], or_node, log_depth)
         or_node.set_children_for_property('left', [left])
-        right = clause_to_tree(clause[1:], or_node)
+        right = clause_to_tree(clause[border:], or_node, log_depth)
         or_node.set_children_for_property('right', [right])
         return or_node
 
 
-def cnf_to_eqnet(clauses, parent=None):
+def cnf_to_eqnet(clauses, parent=None, log_depth=False):
     assert clauses
 
     if parent is None:
         start = Node("Start", ("child",))
-        cnf_node = cnf_to_eqnet(clauses, start)
+        cnf_node = cnf_to_eqnet(clauses, start, log_depth)
         start.set_children_for_property("child", [cnf_node])
         return list('whatever'), start
 
     if len(clauses) == 1:
-        return clause_to_tree(clauses[0], parent)
+        return clause_to_tree(clauses[0], parent, log_depth)
     else:
+        border = int(len(clauses) / 2)
         and_node = Node('And', ('left', 'right'), parent=parent)
-        left = clause_to_tree(clauses[0], and_node)
+        left = cnf_to_eqnet(clauses[:border], and_node, log_depth)
         and_node.set_children_for_property('left', [left])
-        right = cnf_to_eqnet(clauses[1:], and_node)
+        right = cnf_to_eqnet(clauses[border:], and_node, log_depth)
         and_node.set_children_for_property('right', [right])
         return and_node
 
