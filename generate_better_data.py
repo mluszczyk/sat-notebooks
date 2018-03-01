@@ -31,7 +31,6 @@ def main(filename, sample_number, clause_size, variable_number, clause_number):
     def save_to_json_gz(data, filename):
         converted_to_standard_format = {}
         for n, all_expressions in data.items():
-            all_expressions = all_expressions[0]
             expression_dicts = [dict(Tokens=expr[0], Tree=convert_to_dict(expr[1]))
                                 for expr in all_expressions]
             converted_to_standard_format[n] = dict(Original=expression_dicts[0],
