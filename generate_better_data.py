@@ -16,16 +16,20 @@ from eqnet_format import cnf_to_eqnet
 
 def main(filename, sample_number, clause_size, variable_number, clause_number,
          min_class_size):
-    synthesized_expressions = defaultdict(lambda: list())
+    synthesized_sats = defaultdict(lambda: set())
 
     formula_generator = get_random_ksats(sample_number, clause_size,
                                          variable_number, clause_number)
     for i, sat in tqdm(list(enumerate(formula_generator))):
-        tree_form = cnf_to_eqnet(sat.clauses)
-
         expression = sat.simplified()
         expression_str = str(expression)
-        synthesized_expressions[expression_str].append(tree_form)
+        synthesized_sats[expression_str].add(sat)
+
+    print("Number of formulas after filtering",
+          sum(len(sats) for sats in synthesized_sats.values()))
+
+    synthesized_expressions = {key: [cnf_to_eqnet(sat.clauses) for sat in sats]
+                               for key, sats in synthesized_sats.items()}
 
     print("Number of classes before filtering", len(synthesized_expressions))
     synthesized_expressions = {

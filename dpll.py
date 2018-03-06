@@ -30,9 +30,11 @@ def get_random_ksats(sample_number, clause_size, variable_number,
 
 class SAT(object):
     def __init__(self, clauses: List[List[int]]):
-        clauses = [set(c) for c in clauses]
+        clauses = tuple(tuple(c) for c in clauses)
         if clauses:
-            svars = [abs(x) for x in set.union(*clauses)]
+            svars = set(abs(x)
+                        for clause in clauses
+                        for x in clause)
         else:
             svars = set()
 
@@ -92,6 +94,12 @@ class SAT(object):
         prefix = ("TRUE:" if self.is_true() else
                   ("FALSE:" if self.is_false() else "???:"))
         return prefix + str(self.clauses)
+
+    def __hash__(self):
+        return hash(self.clauses)
+
+    def __eq__(self, other):
+        return self.clauses == other.clauses
 
 
 class DPLL(object):
