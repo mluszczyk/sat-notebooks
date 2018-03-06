@@ -14,7 +14,8 @@ from dpll import get_random_ksats
 from eqnet_format import cnf_to_eqnet
 
 
-def main(filename, sample_number, clause_size, variable_number, clause_number):
+def main(filename, sample_number, clause_size, variable_number, clause_number,
+         min_class_size):
     synthesized_expressions = defaultdict(lambda: list())
 
     formula_generator = get_random_ksats(sample_number, clause_size,
@@ -25,7 +26,13 @@ def main(filename, sample_number, clause_size, variable_number, clause_number):
         expression = sat.simplified()
         expression_str = str(expression)
         synthesized_expressions[expression_str].append(tree_form)
-    print(synthesized_expressions)
+
+    print("Number of classes before filtering", len(synthesized_expressions))
+    synthesized_expressions = {
+        key: trees for key, trees in synthesized_expressions.items()
+        if len(trees) >= min_class_size}
+    print("Number of classes after filtering", len(synthesized_expressions))
+
     print("Done.")
 
     def save_to_json_gz(data, filename):
