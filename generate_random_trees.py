@@ -25,6 +25,7 @@ class TreeNode(namedtuple('TreeNode', ["symbol", "children"])):
             parent = Node('Start', ('child',))
             child = self.to_eqnet(parent)
             parent.set_children_for_property('child', (child,))
+            return parent
 
         if type(self.symbol) == int:
             return Node(chr(ord('a') - 1 + self.symbol), (), parent=parent)
