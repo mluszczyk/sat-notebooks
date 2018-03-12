@@ -2,7 +2,7 @@ import random
 import sys
 
 from typing import Sequence
-from collections import defaultdict, OrderedDict, namedtuple
+from collections import defaultdict, namedtuple
 from sympy.logic import simplify_logic
 from sympy.parsing.sympy_parser import parse_expr
 from tqdm import tqdm
@@ -10,8 +10,6 @@ from tqdm import tqdm
 from data.datasetgenerator import save_result_as_gzipped_json
 from data.tree import Node
 from data.synthetic.boolexpressions import convert_to_dict, to_token_sequence
-
-from eqnet_format import cnf_to_eqnet
 
 
 SYMBOLS = [("&", 2), ("|", 2), ("~", 1)] * 4 + [(None, 0)]
@@ -81,27 +79,32 @@ def main(filename, sample_number, tree_max_size, variable_number,
         synthesized[simplified_str].add(tree)
 
     print("Number of formulas after filtering",
-          sum(len(sats) for sats in synthesized.values()))
+          sum(len(sats) for sats in synthesized.values()), file=sys.stderr)
 
     synthesized_expressions = {key: [tree.to_eqnet() for tree in trees]
                                for key, trees in synthesized.items()}
 
-    print("Number of classes before filtering", len(synthesized_expressions))
+    del synthesized  # hope it would save some memory
+
+    print("Number of classes before filtering", len(synthesized_expressions),
+          file=sys.stderr)
     synthesized_expressions = {
         key: trees for key, trees in synthesized_expressions.items()
         if len(trees) >= min_class_size}
-    print("Number of classes after filtering", len(synthesized_expressions))
+    print("Number of classes after filtering", len(synthesized_expressions),
+          file=sys.stderr)
 
-    print("Done.")
 
     def save_to_json_gz(data, filename):
+        print("Converting to JSON", file=sys.stderr)
         converted_to_standard_format = {}
-        for n, all_expressions in data.items():
+        for n, all_expressions in tqdm(data.items()):
             expression_dicts = [dict(Tokens=list("whatever"), Tree=convert_to_dict(expr))
                                 for expr in all_expressions]
             converted_to_standard_format[n] = dict(Original=expression_dicts[0],
                                                    Noise=expression_dicts[1:])
 
+        print("Saving", file=sys.stderr)
         save_result_as_gzipped_json(filename, converted_to_standard_format)
 
     save_to_json_gz(synthesized_expressions, filename + ".json.gz")
